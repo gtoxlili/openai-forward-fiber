@@ -1,0 +1,139 @@
+definitions:
+  entity.RechargeDto:
+    properties:
+      amount:
+        type: number
+      recharge_id:
+        type: string
+      target_key:
+        type: string
+    required:
+    - amount
+    - recharge_id
+    - target_key
+    type: object
+  entity.UserInfo:
+    properties:
+      models:
+        description: 可用模型
+        items:
+          type: string
+        type: array
+      recharge_id_records:
+        description: 充值记录
+        items:
+          type: string
+        type: array
+      total_tokens:
+        type: number
+      used_tokens:
+        type: number
+    type: object
+info:
+  contact: {}
+  description: CarPaint AI API
+  license:
+    name: GPLv3
+    url: https://www.gnu.org/licenses/gpl-3.0.en.html
+  title: CarPaint AI
+paths:
+  /openai/{+}:
+    post:
+      parameters:
+      - description: 服务名称
+        in: path
+        name: +
+        required: true
+        type: string
+      - description: API Key
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      - description: Content-Type
+        in: header
+        name: Content-Type
+        required: true
+        type: string
+      - description: 请求体
+        in: body
+        name: dto
+        required: true
+        schema:
+          type: object
+      responses: {}
+      summary: OpenAI 转发服务
+      tags:
+      - OpenAI
+  /user/add:
+    get:
+      produces:
+      - application/json
+      responses: {}
+      summary: 新增 API Key
+      tags:
+      - User
+  /user/delete/{apiKey}:
+    delete:
+      parameters:
+      - description: API Key
+        in: path
+        name: apiKey
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses: {}
+      security:
+      - ApiKeyAuth: []
+      summary: 删除用户
+      tags:
+      - User
+  /user/info:
+    get:
+      parameters:
+      - description: API Key
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.UserInfo'
+      summary: 获取用户信息
+      tags:
+      - User
+  /user/recharge:
+    put:
+      parameters:
+      - description: RechargeDto
+        in: body
+        name: dto
+        required: true
+        schema:
+          $ref: '#/definitions/entity.RechargeDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.UserInfo'
+      security:
+      - ApiKeyAuth: []
+      summary: 充值
+      tags:
+      - User
+schemes:
+- http
+- https
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Admin-Token
+    type: apiKey
+swagger: "2.0"

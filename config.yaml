@@ -1,0 +1,28 @@
+origins: '*'
+
+api_version: v1
+
+#  LimiterMax 限流器相关配置
+limiter_max: 10
+limiter_expiration: 1m0s
+
+# 根 Token ( 用于使用 OpenAI API 服务 )
+root_token: ""
+
+# 管理员 Token ( 用于使用一些管理员 API )
+admin_token: ""
+
+# 等待 OpenAI 流响应的超时时间
+stream_timeout: 4s
+
+# 服务监听地址
+addr: 127.0.0.1:3000
+
+# 是否允许通过 OpenAI API-KEY 进行转发
+rejection_openai_api_key: false
+
+# 允许转发的 OpenAI 服务
+allowed_routes:
+  - completions
+  - embeddings
+  - chat/completions
