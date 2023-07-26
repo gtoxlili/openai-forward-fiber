@@ -1,9 +1,9 @@
 package pool
 
-func Get(size int) []byte {
+func AcquireByteArr(size int) []byte {
 	return defaultAllocator.Get(size)
 }
 
-func Put(buf []byte) {
+func ReleaseByteArr(buf []byte) {
 	defaultAllocator.Put(buf)
 }

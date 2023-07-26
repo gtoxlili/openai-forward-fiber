@@ -29,7 +29,7 @@ func NewAllocator() *Allocator {
 	return alloc
 }
 
-// Get a []byte from pool with most appropriate cap
+// AcquireByteArr a []byte from pool with most appropriate cap
 func (alloc *Allocator) Get(size int) []byte {
 	if size <= 0 || size > 65536 {
 		return nil
@@ -43,7 +43,7 @@ func (alloc *Allocator) Get(size int) []byte {
 	return alloc.buffers[bit+1].Get().([]byte)[:size]
 }
 
-// Put returns a []byte to pool for future use,
+// ReleaseByteArr returns a []byte to pool for future use,
 // which the cap must be exactly 2^n
 func (alloc *Allocator) Put(buf []byte) {
 	alloc.buffers[msb(cap(buf))].Put(buf)

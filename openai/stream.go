@@ -9,8 +9,8 @@ import (
 
 // GetStreamRes 获取流的响应内容
 func GetStreamRes(reader io.Reader, onClose ...func()) string {
-	sb := pool.GetBuffer()
-	defer pool.PutBuffer(sb)
+	sb := pool.AcquireBuffer()
+	defer pool.ReleaseBuffer(sb)
 	vo := &entity.OpenaiStreamVO{
 		Choices: make([]struct {
 			Delta struct {

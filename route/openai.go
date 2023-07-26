@@ -164,8 +164,8 @@ func openaiForward(c *fiber.Ctx) error {
 			bodyStream = io.TeeReader(resp.BodyStream(), buf)
 			return c.SendStream(bodyStream)
 		} else {
-			dst := pool.Get(resp.Header.ContentLength())
-			defer pool.Put(dst)
+			dst := pool.AcquireByteArr(resp.Header.ContentLength())
+			defer pool.ReleaseByteArr(dst)
 			n, _ := resp.BodyStream().Read(dst)
 			defer fiber.ReleaseResponse(resp)
 

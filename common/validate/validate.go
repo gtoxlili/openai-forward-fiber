@@ -25,8 +25,8 @@ func Struct(s any) error {
 	r := validate.Struct(s)
 	if r != nil {
 		err := r.(validator.ValidationErrors)
-		sb := pool.GetBuffer()
-		defer pool.PutBuffer(sb)
+		sb := pool.AcquireBuffer()
+		defer pool.ReleaseBuffer(sb)
 		for _, e := range err {
 			sb.WriteString(e.Translate(trans))
 			sb.WriteString(" | ")
