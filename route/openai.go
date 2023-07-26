@@ -142,7 +142,7 @@ func openaiForward(c *fiber.Ctx) error {
 		if utils.UnsafeString(resp.Header.ContentType()) == "text/event-stream" {
 			buf := signBuffer.New(func(b []byte) bool {
 				return bytes.Contains(b, []byte("[DONE]"))
-			}, config.StreamTimeout)
+			}, config.StreamTimeout, []byte("data:"))
 			openai.SpendHandler(c.Get("Authorization"), dto.Model, openai.CalculateDtoTokens(dto), true)
 			go openai.SpendHandler(c.Get("Authorization"), dto.Model, openai.CalculateTokens(openai.GetStreamRes(buf)), false)
 			bodyStream = io.TeeReader(resp.BodyStream(), buf)
