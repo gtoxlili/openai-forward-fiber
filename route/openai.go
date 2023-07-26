@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2/utils"
 	"github.com/valyala/fasthttp/fasthttpproxy"
 	"io"
+	"openai-forward-fiber/common/pool"
 	"openai-forward-fiber/common/signBuffer"
 	"openai-forward-fiber/config"
 	"openai-forward-fiber/entity"
@@ -107,22 +108,21 @@ func openaiAllow(c *fiber.Ctx) error {
 //	@Param		Content-Type	header	string	true	"Content-Type"
 //	@Param		dto				body	object	true	"请求体"
 func openaiForward(c *fiber.Ctx) error {
+
 	agent := fiber.AcquireAgent()
 	defer fiber.ReleaseAgent(agent)
-	req := agent.Request()
-	req.Header.SetMethod(c.Method())
-	req.Header.SetRequestURI("https://api.openai.com/v1/" + c.Params("+"))
-	req.SetBody(c.Body())
 
-	c.Request().Header.VisitAll(func(key, value []byte) {
-		req.Header.SetBytesKV(key, value)
-	})
+	req := agent.Request()
+	c.Request().CopyTo(req)
+	req.SetRequestURI("https://api.openai.com/v1/" + c.Params("+"))
 	req.Header.Set("Authorization", c.Context().UserValue("api_key").(string))
+
 	resp := fiber.AcquireResponse()
 	// defer fiber.ReleaseResponse(resp)
 	if err := agent.Parse(); err != nil {
 		return fmt.Errorf("parse_request: %w", err)
 	}
+
 	// 根据请求头判断是否需要流式响应
 	var dto entity.OpenaiDto
 	if err := c.BodyParser(&dto); err != nil {
@@ -131,41 +131,56 @@ func openaiForward(c *fiber.Ctx) error {
 	if dto.Stream {
 		agent.HostClient.StreamResponseBody = true
 	}
+
 	// 设置代理
 	if config.ProxyAddr != "" {
 		agent.HostClient.Dial = fasthttpproxy.FasthttpHTTPDialer(config.ProxyAddr)
 	}
+
+	// 发送请求
 	if err := agent.HostClient.Do(req, resp); err != nil {
 		return fmt.Errorf("do_request: %w", err)
 	}
-	resp.Header.VisitAll(func(key, value []byte) {
-		c.Set(utils.UnsafeString(key), utils.UnsafeString(value))
-	})
+
+	resp.CopyTo(c.Response())
+
 	if dto.Stream {
 		var bodyStream io.Reader
 		// 如果返回的是流 Content-Type: text/event-stream
 		if utils.UnsafeString(resp.Header.ContentType()) == "text/event-stream" {
+
 			buf := signBuffer.New(func(b []byte) bool {
 				return bytes.Contains(b, []byte("[DONE]"))
 			}, config.StreamTimeout, []byte("data:"))
+
+			// 计算代币
 			openai.SpendHandler(c.Get("Authorization"), dto.Model, openai.CalculateDtoTokens(dto), true)
-			go func(authorization, model string) {
-				openai.SpendHandler(authorization, model, openai.CalculateTokens(openai.GetStreamRes(buf)), false)
-			}(c.Get("Authorization"), dto.Model)
+			go func(authorization, model string, release func()) {
+				openai.SpendHandler(authorization, model, openai.CalculateTokens(openai.GetStreamRes(buf, release)), false)
+			}(c.Get("Authorization"), dto.Model, func() {
+				fiber.ReleaseResponse(resp)
+			})
+
 			bodyStream = io.TeeReader(resp.BodyStream(), buf)
+			return c.SendStream(bodyStream)
 		} else {
-			bodyStream = resp.BodyStream()
+			dst := pool.Get(resp.Header.ContentLength())
+			defer pool.Put(dst)
+			n, _ := resp.BodyStream().Read(dst)
+			defer fiber.ReleaseResponse(resp)
+
+			return c.Send(dst[:n])
 		}
-		return c.Status(resp.StatusCode()).SendStream(bodyStream)
 	} else {
 		defer fiber.ReleaseResponse(resp)
-		// Content-Encoding: br
 		body, _ := resp.BodyUnbrotli()
+
+		// 计算代币
 		var vo entity.OpenaiVO
 		if err := json.Unmarshal(body, &vo); err == nil {
 			openai.SpendHandler(c.Get("Authorization"), dto.Model, vo.Usage.PromptTokens, true)
 			openai.SpendHandler(c.Get("Authorization"), dto.Model, vo.Usage.TotalTokens-vo.Usage.PromptTokens, false)
 		}
-		return c.Status(resp.StatusCode()).Send(resp.Body())
+		return nil
 	}
 }
