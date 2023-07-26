@@ -154,12 +154,11 @@ func openaiForward(c *fiber.Ctx) error {
 			}, config.StreamTimeout, []byte("data:"))
 
 			// 计算代币
-			openai.SpendHandler(c.Get("Authorization"), dto.Model, openai.CalculateDtoTokens(dto), true)
-			go func(authorization, model string, release func()) {
-				openai.SpendHandler(authorization, model, openai.CalculateTokens(openai.GetStreamRes(buf, release)), false)
-			}(c.Get("Authorization"), dto.Model, func() {
-				fiber.ReleaseResponse(resp)
-			})
+			openai.SpendHandler(c.Get("Authorization"), dto.Model, openai.CalculateDtoTokens(&dto), true)
+			go func(authorization string) {
+				defer fiber.ReleaseResponse(resp)
+				openai.SpendHandler(authorization, dto.Model, openai.CalculateTokens(openai.GetStreamRes(buf)), false)
+			}(c.Get("Authorization"))
 
 			bodyStream = io.TeeReader(resp.BodyStream(), buf)
 			return c.SendStream(bodyStream)

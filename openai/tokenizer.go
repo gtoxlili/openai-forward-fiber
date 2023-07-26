@@ -10,7 +10,7 @@ var (
 	enc, _ = tokenizer.Get(tokenizer.Cl100kBase)
 )
 
-func convertPrompt(dto entity.OpenaiDto) string {
+func convertPrompt(dto *entity.OpenaiDto) string {
 	messages := dto.Messages
 	result := &bytes.Buffer{}
 	for _, message := range messages {
@@ -24,7 +24,7 @@ func convertPrompt(dto entity.OpenaiDto) string {
 	return result.String()
 }
 
-func CalculateDtoTokens(dto entity.OpenaiDto) int {
+func CalculateDtoTokens(dto *entity.OpenaiDto) int {
 	prompt := convertPrompt(dto)
 	ids, _, _ := enc.Encode(prompt)
 	return len(ids)

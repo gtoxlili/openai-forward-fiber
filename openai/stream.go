@@ -8,7 +8,7 @@ import (
 )
 
 // GetStreamRes 获取流的响应内容
-func GetStreamRes(reader io.Reader, onClose ...func()) string {
+func GetStreamRes(reader io.Reader) string {
 	sb := pool.AcquireBuffer()
 	defer pool.ReleaseBuffer(sb)
 	vo := &entity.OpenaiStreamVO{
@@ -24,11 +24,6 @@ func GetStreamRes(reader io.Reader, onClose ...func()) string {
 			break
 		}
 		sb.WriteString(vo.Choices[0].Delta.Content)
-	}
-	if len(onClose) > 0 {
-		for _, f := range onClose {
-			f()
-		}
 	}
 	return sb.String()
 }
