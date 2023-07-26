@@ -1,7 +1,7 @@
 package openai
 
 import (
-	"github.com/cespare/xxhash"
+	"github.com/cespare/xxhash/v2"
 	"openai-forward-fiber/config"
 )
 

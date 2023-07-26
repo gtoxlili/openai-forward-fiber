@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/bytedance/sonic v1.9.2
-	github.com/cespare/xxhash v1.1.0
+	github.com/cespare/xxhash/v2 v2.2.0
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.14.1
