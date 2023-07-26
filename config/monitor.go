@@ -28,6 +28,7 @@ func init() {
 	Addr = config.Addr
 	RejectionOpenaiApiKey = config.RejectionOpenaiApiKey
 	AllowedRoutes = config.AllowedRoutes
+	ProxyAddr = config.ProxyAddr
 
 	// 打印配置
 	log.Info().Msg("已加载配置文件")

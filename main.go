@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/proxy"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/rs/zerolog/log"
 	"openai-forward-fiber/config"
@@ -40,7 +41,6 @@ func main() {
 	})
 
 	app.Get("/swagger/*", swagger.HandlerDefault)
-
 	api := app.Group(fmt.Sprintf("/%s", config.ApiVersion),
 		cors.New(cors.Config{
 			AllowOrigins:     config.Origins,
@@ -57,7 +57,7 @@ func main() {
 	)
 	route.Openai(api.Group("/openai/+"))
 	route.User(api.Group("/user"))
-
+	app.All("/forward", proxy.Forward("http://127.0.0.1:3000/v1/openai/chat/completions"))
 	sign := make(chan os.Signal, 1)
 	signal.Notify(sign, syscall.SIGINT, syscall.SIGTERM)
 

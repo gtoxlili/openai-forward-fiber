@@ -13,6 +13,7 @@ type Config struct {
 	Addr                  string        `yaml:"addr"`
 	RejectionOpenaiApiKey bool          `yaml:"rejection_openai_api_key"`
 	AllowedRoutes         []string      `yaml:"allowed_routes"`
+	ProxyAddr             string        `yaml:"proxy_addr"`
 }
 
 var (
@@ -26,4 +27,5 @@ var (
 	Addr                  string
 	RejectionOpenaiApiKey bool
 	AllowedRoutes         []string
+	ProxyAddr             string
 )

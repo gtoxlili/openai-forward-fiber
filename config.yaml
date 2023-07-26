@@ -26,3 +26,6 @@ allowed_routes:
   - completions
   - embeddings
   - chat/completions
+
+# 代理地址 ( 若不需要代理, 则留空 )
+proxy-addr: "127.0.0.1:7890"

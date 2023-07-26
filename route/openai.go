@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/utils"
+	"github.com/valyala/fasthttp/fasthttpproxy"
 	"io"
 	"openai-forward-fiber/common/signBuffer"
 	"openai-forward-fiber/config"
@@ -124,11 +125,15 @@ func openaiForward(c *fiber.Ctx) error {
 	}
 	// 根据请求头判断是否需要流式响应
 	var dto entity.OpenaiDto
-	if err := json.Unmarshal(req.Body(), &dto); err != nil {
+	if err := c.BodyParser(&dto); err != nil {
 		return fmt.Errorf("unmarshal_request: %w", err)
 	}
 	if dto.Stream {
 		agent.HostClient.StreamResponseBody = true
+	}
+	// 设置代理
+	if config.ProxyAddr != "" {
+		agent.HostClient.Dial = fasthttpproxy.FasthttpHTTPDialer(config.ProxyAddr)
 	}
 	if err := agent.HostClient.Do(req, resp); err != nil {
 		return fmt.Errorf("do_request: %w", err)
@@ -144,7 +149,9 @@ func openaiForward(c *fiber.Ctx) error {
 				return bytes.Contains(b, []byte("[DONE]"))
 			}, config.StreamTimeout, []byte("data:"))
 			openai.SpendHandler(c.Get("Authorization"), dto.Model, openai.CalculateDtoTokens(dto), true)
-			go openai.SpendHandler(c.Get("Authorization"), dto.Model, openai.CalculateTokens(openai.GetStreamRes(buf)), false)
+			go func(authorization, model string) {
+				openai.SpendHandler(authorization, model, openai.CalculateTokens(openai.GetStreamRes(buf)), false)
+			}(c.Get("Authorization"), dto.Model)
 			bodyStream = io.TeeReader(resp.BodyStream(), buf)
 		} else {
 			bodyStream = resp.BodyStream()
