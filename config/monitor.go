@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 	_ "openai-forward-fiber/log"
@@ -30,6 +31,8 @@ func init() {
 	AllowedRoutes = config.AllowedRoutes
 	ProxyAddr = config.ProxyAddr
 
-	// 打印配置
-	log.Info().Msg("已加载配置文件")
+	if !fiber.IsChild() {
+		log.Info().Msg("已加载配置文件")
+	}
+
 }

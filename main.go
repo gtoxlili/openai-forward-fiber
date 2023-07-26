@@ -34,7 +34,7 @@ import (
 func main() {
 	app := fiber.New(fiber.Config{
 		AppName:     "CarPaint AI",
-		Prefork:     false,
+		Prefork:     true,
 		JSONDecoder: json.Unmarshal,
 		JSONEncoder: json.Marshal,
 	})
@@ -62,7 +62,9 @@ func main() {
 
 	go func() {
 		<-sign
-		log.Info().Msg("application gracefully shutdown")
+		if !fiber.IsChild() {
+			log.Info().Msg("application gracefully shutdown")
+		}
 		_ = app.Shutdown()
 	}()
 
