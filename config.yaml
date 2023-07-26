@@ -7,7 +7,13 @@ limiter_max: 10
 limiter_expiration: 1m0s
 
 # 根 Token ( 用于使用 OpenAI API 服务 )
-root_token: ""
+root_token:
+  - ""
+  - ""
+  - ""
+
+# TODO : 负载均衡策略 LRU | HASH
+load_balancing: LRU
 
 # 管理员 Token ( 用于使用一些管理员 API )
 admin_token: ""

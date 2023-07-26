@@ -6,6 +6,10 @@ Openai-Forward-Fiber is a project written in Go that provides a forwarding servi
 
 The following features are supported by Openai-Forward-Fiber:
 
+- **Forwarding Service**: Openai-Forward-Fiber acts as a forwarding service for OpenAI API, allowing users to access the API using the generated API key. It supports forwarding requests to multiple OpenAI API keys, providing load balancing capabilities.
+
+- **Load Balancing**: The project incorporates load balancing algorithms to distribute requests among multiple OpenAI API keys. Currently, it supports two load balancing algorithms: LRU (Least Recently Used) and Hash Modulo. Users can configure the load balancing algorithm in the config.yaml file based on their requirements.
+
 - **Sliding Window Algorithm-based User Rate Limiting**: Openai-Forward-Fiber incorporates a sliding window algorithm to control and limit the number of requests made by users. This ensures fair usage of API tokens among all users.
 
 - **Token Usage Billing**: Openai-Forward-Fiber tracks the token usage for each user and provides billing based on the tokens consumed. This allows for accurate measurement of resource utilization and cost allocation.

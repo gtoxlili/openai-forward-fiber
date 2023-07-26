@@ -58,6 +58,7 @@ func openaiReject(c *fiber.Ctx) error {
 // 校验 token 是否存在且还有余额的中间件
 func openaiCheckToken(c *fiber.Ctx) error {
 	apiKey := c.Get("Authorization")
+
 	if apiKey == "" || strings.HasPrefix(apiKey, "Bearer sk-") {
 		c.Context().SetUserValue("api_key", apiKey)
 		return c.Next()
@@ -85,7 +86,7 @@ func openaiCheckToken(c *fiber.Ctx) error {
 	}
 	// TODO 检测模型是否可用
 
-	c.Context().SetUserValue("api_key", "Bearer "+config.RootToken)
+	c.Context().SetUserValue("api_key", openai.LoadBalance(utils.UnsafeBytes(apiKey)))
 	return c.Next()
 }
 

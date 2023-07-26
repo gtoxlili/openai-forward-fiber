@@ -4,6 +4,7 @@ go 1.20
 
 require (
 	github.com/bytedance/sonic v1.9.2
+	github.com/cespare/xxhash v1.1.0
 	github.com/go-playground/locales v0.14.1
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-playground/validator/v10 v10.14.1
@@ -14,6 +15,7 @@ require (
 	github.com/rs/zerolog v1.29.1
 	github.com/swaggo/swag v1.16.1
 	github.com/tiktoken-go/tokenizer v0.1.0
+	github.com/valyala/fasthttp v1.48.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -45,7 +47,6 @@ require (
 	github.com/tinylib/msgp v1.1.8 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasthttp v1.48.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
 	golang.org/x/crypto v0.7.0 // indirect

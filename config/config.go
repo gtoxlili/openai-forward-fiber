@@ -7,7 +7,7 @@ type Config struct {
 	ApiVersion            string        `yaml:"api_version"`
 	LimiterMax            int           `yaml:"limiter_max"`
 	LimiterExpiration     time.Duration `yaml:"limiter_expiration"`
-	RootToken             string        `yaml:"root_token"`
+	RootToken             []string      `yaml:"root_token"`
 	AdminToken            string        `yaml:"admin_token"`
 	StreamTimeout         time.Duration `yaml:"stream_timeout"`
 	Addr                  string        `yaml:"addr"`
@@ -21,7 +21,7 @@ var (
 	ApiVersion            string
 	LimiterMax            int
 	LimiterExpiration     time.Duration
-	RootToken             string
+	RootToken             []string
 	AdminToken            string
 	StreamTimeout         time.Duration
 	Addr                  string
